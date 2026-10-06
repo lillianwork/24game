@@ -298,6 +298,11 @@
     }
     document.addEventListener('pointerdown', unlockAudio, { passive: true });
     document.addEventListener('touchstart', unlockAudio, { passive: true });
+    document.addEventListener('touchend', unlockAudio, { passive: true });
+    document.addEventListener('click', unlockAudio, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) unlockAudio();
+    });
   }
 
   if (document.readyState === 'loading') {

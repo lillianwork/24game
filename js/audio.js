@@ -11,9 +11,13 @@
     try {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
+      // iOS 17+ 默认 audioSession 为 ambient，静音键会静音 Web Audio；设为 playback 保证出声
+      if (navigator.audioSession && navigator.audioSession.type) {
+        try { navigator.audioSession.type = 'playback'; } catch (e) {}
+      }
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = muted ? 0 : 0.5;
+      master.gain.value = muted ? 0 : 0.7;
       master.connect(ctx.destination);
     } catch (e) { /* 无音频支持时静默 */ }
   }
@@ -27,7 +31,7 @@
 
   function setMuted(m) {
     muted = !!m;
-    if (master) master.gain.value = muted ? 0 : 0.5;
+    if (master) master.gain.value = muted ? 0 : 0.7;
   }
   function isMuted() { return muted; }
 
