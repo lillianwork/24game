@@ -179,6 +179,7 @@ body {
 .method-emoji { font-size: 40px; }
 .method-name { font-size: 22px; font-weight: 800; color: var(--primary); }
 .method-slogan { display: block; font-size: 14px; color: #636e72; margin-top: 2px; }
+.card-text { display: flex; flex-direction: column; }
 
 /* 方法详情 */
 #screen-method-detail { gap: 14px; }

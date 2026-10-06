@@ -86,5 +86,12 @@ ok(Levels.getDifficulty(29).carryPct === 0.5, '100以内各题型随机(carryPct
 ok(Levels.getPointsPerCorrect(60) === 60, `getPointsPerCorrect(60)=${Levels.getPointsPerCorrect(60)}`);
 ok(Levels.getPointsPerCorrect(61) === 60, `getPointsPerCorrect(61)=${Levels.getPointsPerCorrect(61)}`);
 
+// 5. 选关起始关卡
+console.log('\n[5] 选关起始关卡 firstLevelOfBand');
+const expectedStarts = [1, 4, 9, 14, 19, 24];
+for (let b = 0; b < expectedStarts.length; b++) {
+  ok(Levels.firstLevelOfBand(b) === expectedStarts[b], `band ${b} 起始关=${Levels.firstLevelOfBand(b)}`);
+}
+
 console.log(`\n结果: ${pass} 通过, ${fail} 失败`);
 process.exit(fail ? 1 : 0);

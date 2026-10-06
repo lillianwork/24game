@@ -3,12 +3,12 @@
   'use strict';
 
   var TITLES = [
-    { emoji: '🌱', name: '5以内',   max: 5   },
-    { emoji: '🐣', name: '10以内',  max: 10  },
-    { emoji: '🌟', name: '20以内',  max: 20  },
-    { emoji: '🛡️', name: '30以内',  max: 30  },
-    { emoji: '🏆', name: '50以内',  max: 50  },
-    { emoji: '👑', name: '100以内', max: 100 },
+    { emoji: '🌱', name: '5以内',   max: 5,   desc: '5以内加减法' },
+    { emoji: '🐣', name: '10以内',  max: 10,  desc: '10以内加减法' },
+    { emoji: '🌟', name: '20以内',  max: 20,  desc: '20以内进退位' },
+    { emoji: '🛡️', name: '30以内',  max: 30,  desc: '30以内进退位' },
+    { emoji: '🏆', name: '50以内',  max: 50,  desc: '50以内进退位' },
+    { emoji: '👑', name: '100以内', max: 100, desc: '100以内综合' },
   ];
 
   var MONSTERS = [
@@ -73,6 +73,15 @@
     return 10 * (getBand(level) + 1);
   }
 
+  // band 的起始关卡（用于选关跳转）：band 0 → 1，band 1 → 4，band 2 → 9，…
+  function firstLevelOfBand(band) {
+    var lvl = 1;
+    for (var i = 0; i < band && i < TITLE_LEVELS.length; i++) {
+      lvl += TITLE_LEVELS[i];
+    }
+    return lvl;
+  }
+
   global.Levels = {
     TITLES: TITLES,
     MONSTERS: MONSTERS,
@@ -87,5 +96,6 @@
     getBand: getBand,
     getDifficulty: getDifficulty,
     getPointsPerCorrect: getPointsPerCorrect,
+    firstLevelOfBand: firstLevelOfBand,
   };
 })(window);

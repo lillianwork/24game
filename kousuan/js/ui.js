@@ -6,10 +6,11 @@
 
   function cache() {
     var ids = [
-      'screen-home', 'screen-game', 'screen-levelup', 'screen-method', 'screen-method-detail',
+      'screen-home', 'screen-game', 'screen-levelup', 'screen-method', 'screen-method-detail', 'screen-select',
       'overlay-title', 'overlay-method',
       'home-title-emoji', 'home-title-name', 'home-level', 'home-points', 'home-monster',
-      'btn-play', 'btn-mute-home', 'btn-reset', 'btn-method',
+      'btn-play', 'btn-mute-home', 'btn-reset', 'btn-method', 'btn-select', 'btn-select-back',
+      'select-list',
       'btn-back', 'game-level', 'game-qcounter', 'game-points', 'btn-mute-game',
       'game-monster', 'hp-fill', 'hp-text', 'question-text', 'answer-display', 'keypad',
       'btn-hint', 'btn-reset-q',
@@ -25,7 +26,7 @@
 
   var SCREENS = {
     home: 'screen-home', game: 'screen-game', levelup: 'screen-levelup',
-    method: 'screen-method', methodDetail: 'screen-method-detail',
+    method: 'screen-method', methodDetail: 'screen-method-detail', select: 'screen-select',
   };
 
   function showScreen(name) {
@@ -140,6 +141,23 @@
       b.appendChild(em); b.appendChild(nm); b.appendChild(sl);
       b.addEventListener('click', function () { onTap(m.key); });
       el['method-list'].appendChild(b);
+    });
+  }
+
+  // ---- 选关 ----
+  function renderSelectList(onTap) {
+    el['select-list'].innerHTML = '';
+    Levels.TITLES.forEach(function (t, i) {
+      var b = document.createElement('button');
+      b.className = 'method-card';
+      var em = document.createElement('span'); em.className = 'method-emoji'; em.textContent = t.emoji;
+      var box = document.createElement('span'); box.className = 'card-text';
+      var nm = document.createElement('span'); nm.className = 'method-name'; nm.textContent = t.name;
+      var sl = document.createElement('span'); sl.className = 'method-slogan'; sl.textContent = t.desc;
+      box.appendChild(nm); box.appendChild(sl);
+      b.appendChild(em); b.appendChild(box);
+      b.addEventListener('click', function () { onTap(i); });
+      el['select-list'].appendChild(b);
     });
   }
 
@@ -302,6 +320,7 @@
     showMethodOverlay: showMethodOverlay,
     hideMethodOverlay: hideMethodOverlay,
     renderMethodList: renderMethodList,
+    renderSelectList: renderSelectList,
     renderMethodDetail: renderMethodDetail,
     nextMethodExample: nextMethodExample,
     methodStepNext: methodStepNext,

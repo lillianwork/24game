@@ -47,6 +47,20 @@
     UI.renderMethodDetail(key);
   }
 
+  function openSelect() {
+    AudioFX.stopSpeak();
+    AudioFX.play('tap');
+    UI.renderSelectList(onSelectTitle);
+    UI.showScreen('select');
+  }
+
+  function onSelectTitle(band) {
+    AudioFX.play('tap');
+    state.level = Levels.firstLevelOfBand(band);
+    Storage.save(state);
+    startGame();
+  }
+
   function onReset() {
     if (!confirm('确定要重新开始吗？进度和积分会清空哦。')) return;
     state.level = 1;
@@ -212,6 +226,8 @@
   function bindEvents() {
     document.getElementById('btn-play').addEventListener('click', function () { AudioFX.play('tap'); startGame(); });
     document.getElementById('btn-method').addEventListener('click', openMethodClass);
+    document.getElementById('btn-select').addEventListener('click', openSelect);
+    document.getElementById('btn-select-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });
     document.getElementById('btn-method-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });
     document.getElementById('btn-method-detail-back').addEventListener('click', function () { AudioFX.play('tap'); openMethodClass(); });
     document.getElementById('btn-method-play').addEventListener('click', function () { AudioFX.play('tap'); UI.replayMethodExample(); });
