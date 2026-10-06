@@ -8,6 +8,7 @@
   var mode = 'step';
   var stepCards = [];
   var stepSel = [];
+  var stepPendingOp = null;
   var exprTokens = [];
   var pendingTitleUp = false;
 
@@ -82,6 +83,7 @@
   function resetStepUI() {
     stepCards = question.numbers.slice();
     stepSel = [];
+    stepPendingOp = null;
     UI.clearHistory();
     UI.renderStepCards(stepCards, stepSel, onStepCardTap);
     UI.renderStepOps(question.stage.ops, onStepOpTap);
@@ -100,24 +102,41 @@
     var pos = stepSel.indexOf(i);
     if (pos >= 0) {
       stepSel.splice(pos, 1);
+      stepPendingOp = null;
     } else {
       if (stepSel.length >= 2) stepSel.shift();
       stepSel.push(i);
     }
     UI.renderStepCards(stepCards, stepSel, onStepCardTap);
+    if (stepPendingOp && stepSel.length === 2) {
+      var op = stepPendingOp;
+      stepPendingOp = null;
+      applyStep(op);
+    }
   }
 
   function onStepOpTap(op) {
-    if (stepSel.length < 2) {
-      UI.toast('先选两张数字卡片哦～');
+    if (stepSel.length === 0) {
+      UI.toast('先选一张数字卡片哦～');
       AudioFX.play('tap');
       return;
     }
+    if (stepSel.length === 1) {
+      stepPendingOp = op;
+      UI.toast('再选一张数字卡片～');
+      AudioFX.play('tap');
+      return;
+    }
+    applyStep(op);
+  }
+
+  function applyStep(op) {
     var i = stepSel[0], j = stepSel[1];
     var a = stepCards[i], b = stepCards[j];
     if (op === '/' && Solver.close(b, 0)) {
       UI.toast('不能除以0哦');
       AudioFX.play('wrong');
+      stepPendingOp = null;
       return;
     }
     var result = Solver.apply(a, b, op);
@@ -130,6 +149,7 @@
     keep.push(result);
     stepCards = keep;
     stepSel = [];
+    stepPendingOp = null;
     UI.renderStepCards(stepCards, stepSel, onStepCardTap);
 
     if (stepCards.length === 1) {
@@ -272,11 +292,12 @@
     document.getElementById('btn-title-ok').addEventListener('click', onTitleOk);
     document.getElementById('mode-step').addEventListener('click', function () { setMode('step'); });
     document.getElementById('mode-expr').addEventListener('click', function () { setMode('expr'); });
-    document.addEventListener('pointerdown', function once() {
+    function unlockAudio() {
       AudioFX.init();
       AudioFX.resume();
-      document.removeEventListener('pointerdown', once);
-    });
+    }
+    document.addEventListener('pointerdown', unlockAudio, { passive: true });
+    document.addEventListener('touchstart', unlockAudio, { passive: true });
   }
 
   if (document.readyState === 'loading') {

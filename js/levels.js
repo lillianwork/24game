@@ -66,7 +66,7 @@
     var p = posInTitle(level);
     var f = p / (LEVELS_PER_TITLE - 1);
     var max;
-    if (t === 0)      max = 18 + Math.round(22 * f);      // 18..40（2个数加减）
+    if (t === 0)      max = 30 + Math.round(10 * f);      // 30..40（2个数加减，保证减法可行）
     else if (t === 1) max = 14 + Math.round(16 * f);      // 14..30（3个数加减）
     else if (t === 2) max = 10 + Math.round(20 * f);      // 10..30（4个数加减）
     else if (t === 3) max = 9 + Math.round(12 * f);       // 9..21（混合入门）

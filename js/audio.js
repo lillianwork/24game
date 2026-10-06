@@ -19,7 +19,10 @@
   }
 
   function resume() {
-    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (ctx && ctx.state === 'suspended') {
+      var p = ctx.resume();
+      if (p && p.then) p.catch(function () {});
+    }
   }
 
   function setMuted(m) {
@@ -65,8 +68,15 @@
 
   function play(name) {
     init();
-    resume();
     if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      var p = ctx.resume();
+      if (p && p.then) { p.then(function () { schedule(name); }); return; }
+    }
+    schedule(name);
+  }
+
+  function schedule(name) {
     var t = ctx.currentTime;
     switch (name) {
       case 'tap':

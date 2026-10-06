@@ -1,5 +1,5 @@
 /* sw.js — 离线缓存（Service Worker） */
-var CACHE = 'game24-v1';
+var CACHE = 'game24-v2';
 var ASSETS = [
   './',
   './index.html',
@@ -18,9 +18,13 @@ var ASSETS = [
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(CACHE)
-      .then(function (c) { return c.addAll(ASSETS); })
-      .then(function () { return self.skipWaiting(); })
+    caches.open(CACHE).then(function (c) {
+      return Promise.all(ASSETS.map(function (url) {
+        return fetch(url, { cache: 'reload' }).then(function (res) {
+          if (res && res.status === 200) return c.put(url, res);
+        });
+      }));
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
