@@ -30,7 +30,7 @@
   ];
 
   var QUESTIONS_PER_LEVEL = 10;
-  var LEVELS_PER_TITLE = 10;
+  var LEVELS_PER_TITLE = 5;
   var TARGET = 24;
   var LEVEL_BONUS = 50;
   var TITLE_BONUS = 200;
@@ -55,8 +55,9 @@
   function getStage(level) {
     var t = titleIndex(level);
     if (t === 0) return { count: 2, ops: ['+', '-'] };
-    if (t === 1) return { count: 3, ops: ['+', '-', '*'] };
-    if (t === 2) return { count: 4, ops: ['+', '-'] };
+    if (t === 1) return { count: 3, ops: ['+', '-'] };
+    if (t === 2) return { count: 3, ops: ['+', '-', '*'] };
+    if (t === 3) return { count: 4, ops: ['+', '-'] };
     return { count: 4, ops: ['+', '-', '*', '/'] };
   }
 
@@ -66,11 +67,12 @@
     var p = posInTitle(level);
     var f = p / (LEVELS_PER_TITLE - 1);
     var max;
-    if (t === 0)      max = 30 + Math.round(10 * f);      // 30..40（2个数加减，保证减法可行）
+    if (t === 0)      max = 30 + Math.round(10 * f);      // 30..40（2个数加减）
     else if (t === 1) max = 14 + Math.round(16 * f);      // 14..30（3个数加减）
-    else if (t === 2) max = 10 + Math.round(20 * f);      // 10..30（4个数加减）
-    else if (t === 3) max = 9 + Math.round(12 * f);       // 9..21（混合入门）
-    else              max = Math.min(60, 20 + (t - 3) * 4 + Math.round(10 * f)); // 无限递增
+    else if (t === 2) max = 12 + Math.round(8 * f);       // 12..20（3个数加减乘）
+    else if (t === 3) max = 10 + Math.round(20 * f);      // 10..30（4个数加减）
+    else if (t === 4) max = 9 + Math.round(12 * f);       // 9..21（4个数混合入门）
+    else              max = Math.min(60, 20 + (t - 4) * 4 + Math.round(10 * f)); // 无限递增
     return { min: 1, max: max };
   }
 
