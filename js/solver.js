@@ -87,6 +87,52 @@
     return solvePath(numbers, ops, target) !== null;
   }
 
+  function tryOp(a, b, op) {
+    if (op === '/' && close(b, 0)) return null;
+    return apply(a, b, op);
+  }
+
+  // 左结合（连击）求解：形如 ((((n1 op n2) op n3) op n4) ...)，用于分步累加模型
+  function solveLeftToRight(numbers, ops, target) {
+    target = target == null ? 24 : target;
+    var n = numbers.length;
+    var perm = [], used = [];
+    for (var i = 0; i < n; i++) used.push(false);
+
+    function chain(idx, cur, path, cleanPass) {
+      if (idx === n) return close(cur, target) ? path.slice() : null;
+      for (var o = 0; o < ops.length; o++) {
+        var nr = tryOp(cur, perm[idx], ops[o]);
+        if (nr === null) continue;
+        if (cleanPass === 0 && !(isInt(nr) && nr >= 0)) continue;
+        path.push({ a: cur, b: perm[idx], op: ops[o], result: nr });
+        var r = chain(idx + 1, nr, path, cleanPass);
+        if (r) return r;
+        path.pop();
+      }
+      return null;
+    }
+
+    function buildPerm() {
+      if (perm.length === n) {
+        for (var c = 0; c < 2; c++) {
+          var r = chain(1, perm[0], [], c);
+          if (r) return r;
+        }
+        return null;
+      }
+      for (var i = 0; i < n; i++) {
+        if (used[i]) continue;
+        used[i] = true; perm.push(numbers[i]);
+        var r = buildPerm();
+        if (r) return r;
+        perm.pop(); used[i] = false;
+      }
+      return null;
+    }
+    return buildPerm();
+  }
+
   // 逆向出题：从目标数反向拆分，保证有解（且存在整数路径）
   function generate(count, ops, minNum, maxNum, target) {
     target = target == null ? 24 : target;
@@ -229,6 +275,7 @@
     randInt: randInt,
     solvePath: solvePath,
     canSolve: canSolve,
+    solveLeftToRight: solveLeftToRight,
     generate: generate,
     evalTokens: evalTokens,
     extractNumbers: extractNumbers,

@@ -1,5 +1,5 @@
 /* sw.js — 离线缓存（Service Worker） */
-var CACHE = 'game24-v3';
+var CACHE = 'game24-v4';
 var ASSETS = [
   './',
   './index.html',

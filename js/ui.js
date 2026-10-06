@@ -8,7 +8,7 @@
     var ids = [
       'screen-start', 'screen-home', 'screen-game', 'screen-levelup', 'overlay-title',
       'home-title-emoji', 'home-title-name', 'home-level', 'home-points', 'home-monster',
-      'btn-play', 'btn-mute-home', 'btn-reset',
+      'grade-switch-btns', 'btn-play', 'btn-mute-home', 'btn-reset',
       'game-level', 'game-qcounter', 'game-points', 'game-monster', 'hp-fill', 'hp-text',
       'step-area', 'step-history', 'step-current', 'step-cards', 'step-ops',
       'expr-area', 'expr-display', 'expr-cards', 'expr-ops',
@@ -38,6 +38,17 @@
     el['home-monster'].textContent = mon.emoji;
     el['btn-play'].textContent = '开始第 ' + state.level + ' 关';
     showScreen('home');
+  }
+
+  function renderGradeSwitch(grade) {
+    el['grade-switch-btns'].innerHTML = '';
+    Levels.GRADES.forEach(function (g) {
+      var b = document.createElement('button');
+      b.className = 'grade-chip' + (g.id === grade ? ' active' : '');
+      b.setAttribute('data-grade', g.id);
+      b.textContent = g.emoji + ' ' + (g.name === '三年级及以上' ? '三年级' : g.name);
+      el['grade-switch-btns'].appendChild(b);
+    });
   }
 
   function renderGameChrome(state, questionIndex, grade, mode) {
@@ -194,6 +205,7 @@
     cache: cache,
     showScreen: showScreen,
     renderHome: renderHome,
+    renderGradeSwitch: renderGradeSwitch,
     renderGameChrome: renderGameChrome,
     setHp: setHp,
     setQCounter: setQCounter,

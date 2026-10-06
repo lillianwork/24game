@@ -55,7 +55,7 @@
   function getStage(level) {
     var t = titleIndex(level);
     if (t === 0) return { count: 2, ops: ['+', '-'] };
-    if (t === 1) return { count: 3, ops: ['+', '-'] };
+    if (t === 1) return { count: 3, ops: ['+', '-', '*'] };
     if (t === 2) return { count: 4, ops: ['+', '-'] };
     return { count: 4, ops: ['+', '-', '*', '/'] };
   }

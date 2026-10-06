@@ -32,6 +32,7 @@
 
   function showHome() {
     UI.renderHome(state);
+    UI.renderGradeSwitch(state.grade);
     UI.setMuteIcons(state.muted);
   }
 
@@ -42,6 +43,17 @@
     state.points = 0;
     Storage.save(state);
     showHome();
+  }
+
+  function onGradeSwitch(grade) {
+    if (grade === state.grade) return;
+    AudioFX.play('tap');
+    state.grade = grade;
+    Storage.save(state);
+    UI.renderGradeSwitch(state.grade);
+    var g = null;
+    for (var i = 0; i < Levels.GRADES.length; i++) if (Levels.GRADES[i].id === grade) g = Levels.GRADES[i];
+    UI.toast('已切换为' + (g ? g.name : ''));
   }
 
   function onReset() {
@@ -65,7 +77,10 @@
     var range = Levels.getNumberRange(state.level);
     var numbers = null;
     for (var i = 0; i < 30 && !numbers; i++) {
-      numbers = Solver.generate(stage.count, stage.ops, range.min, range.max, Levels.TARGET);
+      var cand = Solver.generate(stage.count, stage.ops, range.min, range.max, Levels.TARGET);
+      if (!cand) continue;
+      if (isAccumulatorStage(stage) && !Solver.solveLeftToRight(cand, stage.ops, Levels.TARGET)) continue;
+      numbers = cand;
     }
     if (!numbers) numbers = fallbackQuestion(stage);
     question = { numbers: numbers, stage: stage };
@@ -100,9 +115,13 @@
   }
 
   // ---- 分步模式 ----
+  function isAccumulatorStage(stage) {
+    var hasMulDiv = stage.ops.indexOf('*') !== -1 || stage.ops.indexOf('/') !== -1;
+    if (!hasMulDiv) return true;
+    return stage.count === 3;
+  }
   function isAccumulator() {
-    // 纯加减用「连击运行结果」模型；混合乘除保留「任选两张」模型（需要括号/子结果）
-    return question.stage.ops.indexOf('*') === -1 && question.stage.ops.indexOf('/') === -1;
+    return isAccumulatorStage(question.stage);
   }
 
   function onStepCardTap(i) {
@@ -308,7 +327,9 @@
   }
 
   function onHint() {
-    var path = Solver.solvePath(question.numbers, question.stage.ops, Levels.TARGET);
+    var path = isAccumulator()
+      ? Solver.solveLeftToRight(question.numbers, question.stage.ops, Levels.TARGET)
+      : Solver.solvePath(question.numbers, question.stage.ops, Levels.TARGET);
     if (!path || path.length === 0) {
       UI.toast('这题有点难，可以点“重来”换一题');
       return;
@@ -349,6 +370,10 @@
       })(gradeBtns[i]);
     }
     document.getElementById('btn-play').addEventListener('click', function () { AudioFX.play('tap'); startGame(); });
+    document.getElementById('grade-switch-btns').addEventListener('click', function (e) {
+      var chip = e.target.closest ? e.target.closest('.grade-chip') : null;
+      if (chip) onGradeSwitch(chip.getAttribute('data-grade'));
+    });
     document.getElementById('btn-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });
     document.getElementById('btn-reset').addEventListener('click', onReset);
     document.getElementById('btn-mute-home').addEventListener('click', toggleMute);
