@@ -1,0 +1,17 @@
+{
+  "name": "口算小达人",
+  "short_name": "口算",
+  "description": "一年级口算闯关游戏，从5以内到100以内逐级晋级，动画讲解凑十法、破十法、平十法",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ff7675",
+  "theme_color": "#ff7675",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
