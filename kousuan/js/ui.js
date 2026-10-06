@@ -16,7 +16,7 @@
       'result-correct-points', 'result-level-bonus', 'btn-next-level',
       'method-list', 'btn-method-back',
       'method-detail-emoji', 'method-detail-name', 'method-detail-slogan', 'method-detail-desc',
-      'method-detail-anim', 'btn-method-play', 'btn-method-next', 'btn-method-practice', 'btn-method-detail-back',
+      'method-detail-anim', 'btn-method-step', 'btn-method-play', 'btn-method-next', 'btn-method-practice', 'btn-method-detail-back',
       'title-badge', 'title-bonus', 'btn-title-ok',
       'method-overlay-anim', 'toast',
     ];
@@ -164,13 +164,32 @@
     var ex = meta.examples[methodIdx];
     var q = { a: ex.a, op: ex.op, b: ex.b, method: methodKey };
     if (methodAnimHandle) methodAnimHandle.stop();
-    methodAnimHandle = Animator.play(el['method-detail-anim'], Methods.decompose(q).steps, {});
+    AudioFX.stopSpeak();
+    setStepLabel('下一步 ➡️');
+    var steps = Methods.decompose(q).steps;
+    methodAnimHandle = Animator.play(el['method-detail-anim'], steps, {
+      manual: true,
+      voice: true,
+      onStep: function (step, idx) {
+        if (idx === steps.length - 1) setStepLabel('🔁 再看一遍');
+      },
+    });
   }
 
   function nextMethodExample() {
     var meta = Methods.META[methodKey];
     methodIdx = (methodIdx + 1) % meta.examples.length;
     playExample();
+  }
+
+  function setStepLabel(text) { el['btn-method-step'].textContent = text; }
+
+  function methodStepNext() {
+    if (methodAnimHandle && methodAnimHandle.finished()) {
+      playExample();
+    } else if (methodAnimHandle) {
+      methodAnimHandle.next();
+    }
   }
 
   // ---- toast / 静音 ----
@@ -200,6 +219,7 @@
     play: function (container, steps, opts) {
       opts = opts || {};
       var stepMs = opts.stepMs || 1100;
+      var manual = opts.manual === true;
       var i = 0;
       var stopped = false;
       var timer = null;
@@ -237,7 +257,7 @@
         }
       }
 
-      function next() {
+      function advance() {
         if (stopped) return;
         if (i >= steps.length) {
           if (opts.onDone) opts.onDone();
@@ -250,12 +270,17 @@
           if (step.kind === 'answer') AudioFX.play('correct');
           else AudioFX.play('point');
         }
+        if (opts.voice) AudioFX.speak(step.caption);
         i++;
-        timer = setTimeout(next, stepMs);
+        if (!manual) timer = setTimeout(advance, stepMs);
       }
 
-      next();
-      return { stop: function () { stopped = true; clearTimeout(timer); } };
+      advance();
+      return {
+        stop: function () { stopped = true; clearTimeout(timer); },
+        next: function () { if (manual) { clearTimeout(timer); advance(); } },
+        finished: function () { return i >= steps.length; },
+      };
     },
   };
 
@@ -279,6 +304,7 @@
     renderMethodList: renderMethodList,
     renderMethodDetail: renderMethodDetail,
     nextMethodExample: nextMethodExample,
+    methodStepNext: methodStepNext,
     replayMethodExample: playExample,
     toast: toast,
     setMuteIcons: setMuteIcons,

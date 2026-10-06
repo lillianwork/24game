@@ -32,6 +32,7 @@
   function setMuted(m) {
     muted = !!m;
     if (master) master.gain.value = muted ? 0 : 0.7;
+    if (muted) stopSpeak();
   }
   function isMuted() { return muted; }
 
@@ -120,5 +121,33 @@
     }
   }
 
-  global.AudioFX = { init: init, play: play, setMuted: setMuted, isMuted: isMuted, resume: resume };
+  // 语音朗读：Web Speech API 合成中文，把算式符号转成口语（尊重静音）
+  function speak(text) {
+    if (muted) return;
+    if (!('speechSynthesis' in window)) return;
+    try {
+      stopSpeak();
+      var clean = String(text)
+        .replace(/\s*\+\s*/g, ' 加 ')
+        .replace(/\s*-\s*/g, ' 减 ')
+        .replace(/\s*=\s*/g, ' 等于 ')
+        .replace(/\s*\?\s*/g, ' 几 ')
+        .replace(/（/g, '，').replace(/）/g, '');
+      var u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'zh-CN';
+      u.rate = 0.9;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  function stopSpeak() {
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+  }
+
+  global.AudioFX = {
+    init: init, play: play, setMuted: setMuted, isMuted: isMuted, resume: resume,
+    speak: speak, stopSpeak: stopSpeak,
+  };
 })(window);

@@ -9,6 +9,7 @@
   var inputLocked = false;
   var pendingTitleUp = false;
   var inlineAnimHandle = null;
+  var lastQuestionSig = null;
 
   function init() {
     UI.cache();
@@ -29,11 +30,13 @@
   }
 
   function showHome() {
+    AudioFX.stopSpeak();
     UI.renderHome(state);
     UI.setMuteIcons(state.muted);
   }
 
   function openMethodClass() {
+    AudioFX.stopSpeak();
     AudioFX.play('tap');
     UI.renderMethodList(openMethodDetail);
     UI.showScreen('method');
@@ -53,10 +56,12 @@
   }
 
   function startGame() {
+    AudioFX.stopSpeak();
     pendingTitleUp = false;
     questionIndex = 0;
     answerStr = '';
     inputLocked = false;
+    lastQuestionSig = null;
     UI.renderGameChrome(state, questionIndex);
     startQuestion();
   }
@@ -64,7 +69,7 @@
   function startQuestion() {
     if (inlineAnimHandle) { inlineAnimHandle.stop(); inlineAnimHandle = null; }
     UI.hideMethodOverlay();
-    question = Solver.generate(state.level);
+    question = nextQuestion();
     answerStr = '';
     UI.renderQuestion(question);
     UI.renderAnswer('');
@@ -74,6 +79,17 @@
     } else {
       inputLocked = false;
     }
+  }
+
+  function questionSig(q) { return q.a + '|' + q.op + '|' + q.b; }
+
+  function nextQuestion() {
+    var q = Solver.generate(state.level);
+    for (var t = 0; t < 10 && lastQuestionSig && questionSig(q) === lastQuestionSig; t++) {
+      q = Solver.generate(state.level);
+    }
+    lastQuestionSig = questionSig(q);
+    return q;
   }
 
   function playInlineMethod(q) {
@@ -199,6 +215,7 @@
     document.getElementById('btn-method-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });
     document.getElementById('btn-method-detail-back').addEventListener('click', function () { AudioFX.play('tap'); openMethodClass(); });
     document.getElementById('btn-method-play').addEventListener('click', function () { AudioFX.play('tap'); UI.replayMethodExample(); });
+    document.getElementById('btn-method-step').addEventListener('click', function () { UI.methodStepNext(); });
     document.getElementById('btn-method-next').addEventListener('click', function () { AudioFX.play('tap'); UI.nextMethodExample(); });
     document.getElementById('btn-method-practice').addEventListener('click', function () { AudioFX.play('tap'); startGame(); });
     document.getElementById('btn-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });

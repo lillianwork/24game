@@ -67,6 +67,7 @@ body {
 }
 .btn-primary:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
 .btn-primary.big { font-size: 22px; padding: 16px 32px; }
+.btn-block { width: 100%; }
 
 .btn-secondary {
   background: #fff;
