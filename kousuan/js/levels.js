@@ -21,12 +21,23 @@
   ];
 
   var QUESTIONS_PER_LEVEL = 10;
-  var LEVELS_PER_TITLE = 10;
+  // 前 6 个 title 的关卡数：5以内 3 关，其余各 5 关；第 7 个（口算大师）起无限
+  var TITLE_LEVELS = [3, 5, 5, 5, 5, 5];
   var LEVEL_BONUS = 50;
   var TITLE_BONUS = 200;
 
-  function titleIndex(level) { return Math.floor((level - 1) / LEVELS_PER_TITLE); }
-  function posInTitle(level) { return (level - 1) % LEVELS_PER_TITLE; }
+  function locate(level) {
+    var l = level - 1;
+    var idx = 0;
+    while (idx < TITLE_LEVELS.length && l >= TITLE_LEVELS[idx]) {
+      l -= TITLE_LEVELS[idx];
+      idx++;
+    }
+    return { idx: idx, pos: l };
+  }
+
+  function titleIndex(level) { return locate(level).idx; }
+  function posInTitle(level) { return locate(level).pos; }
 
   function getTitle(level) {
     var idx = titleIndex(level);
@@ -44,12 +55,17 @@
   // band：0-based 难度索引，溢出时钳到 5
   function getBand(level) { return Math.min(titleIndex(level), TITLES.length - 1); }
 
-  // 难度：max + 进位/退位概率（带内线性爬坡）
+  // 20/30/50以内带内线性爬坡；100以内（含口算大师）各题型随机出现
   function getDifficulty(level) {
     var band = getBand(level);
-    var p = posInTitle(level) / (LEVELS_PER_TITLE - 1);
     var max = TITLES[band].max;
-    var carryPct = band <= 1 ? 0 : Math.min(0.7, 0.15 + 0.55 * p);
+    var carryPct = 0;
+    if (band >= 2 && band <= 4) {
+      var p = posInTitle(level) / (TITLE_LEVELS[band] - 1);
+      carryPct = Math.min(0.7, 0.15 + 0.55 * p);
+    } else if (band >= 5) {
+      carryPct = 0.5;
+    }
     return { band: band, max: max, carryPct: carryPct };
   }
 
@@ -61,7 +77,7 @@
     TITLES: TITLES,
     MONSTERS: MONSTERS,
     QUESTIONS_PER_LEVEL: QUESTIONS_PER_LEVEL,
-    LEVELS_PER_TITLE: LEVELS_PER_TITLE,
+    TITLE_LEVELS: TITLE_LEVELS,
     LEVEL_BONUS: LEVEL_BONUS,
     TITLE_BONUS: TITLE_BONUS,
     titleIndex: titleIndex,

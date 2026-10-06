@@ -15,10 +15,18 @@ function ok(cond, msg) {
 }
 function ones(n) { return n % 10; }
 
+// 新关卡结构：5以内 3 关，其余各 5 关；取每个 band 中间一关作为代表
+function bandMidLevel(band) {
+  let l = 1;
+  for (let i = 0; i < band; i++) l += Levels.TITLE_LEVELS[i];
+  l += Math.floor(Levels.TITLE_LEVELS[band] / 2);
+  return l;
+}
+
 // 1. 出题范围 + 答案正确性 + 方法有效性
 console.log('\n[1] 出题与答案校验（每 band 5000 题）');
 for (let band = 0; band <= 5; band++) {
-  const level = band * 10 + 5;          // 每个 title 中间一关
+  const level = bandMidLevel(band);      // 每个 title 中间一关
   const max = Levels.getDifficulty(level).max;
   let bad = 0;
   for (let i = 0; i < 5000; i++) {
@@ -38,7 +46,7 @@ for (let band = 0; band <= 5; band++) {
 // 2. 拆解回环
 console.log('\n[2] 方法拆解回环（每 band 2000 题）');
 for (let band = 0; band <= 5; band++) {
-  const level = band * 10 + 5;
+  const level = bandMidLevel(band);
   let bad = 0;
   for (let i = 0; i < 2000; i++) {
     const q = Solver.generate(level);
@@ -60,17 +68,21 @@ for (let band = 0; band <= 5; band++) {
 console.log('\n[3] 20以内三法覆盖');
 const seen = { make10: 0, break10: 0, flat10: 0 };
 for (let i = 0; i < 20000; i++) {
-  const q = Solver.generate(25);
+  const q = Solver.generate(bandMidLevel(2));
   if (q && q.method) seen[q.method]++;
 }
 ok(seen.make10 > 0, `凑十法出现 ${seen.make10} 次`);
 ok(seen.break10 > 0, `破十法出现 ${seen.break10} 次`);
 ok(seen.flat10 > 0, `平十法出现 ${seen.flat10} 次`);
 
-// 4. title / 积分
-console.log('\n[4] title 与积分');
+// 4. title / 积分 / 关卡结构
+console.log('\n[4] title、积分与关卡结构');
 ok(Levels.getTitle(1).name === '5以内', `getTitle(1)=${Levels.getTitle(1).name}`);
-ok(Levels.getTitle(61).name === '口算大师 ★2', `getTitle(61)=${Levels.getTitle(61).name}`);
+ok(Levels.titleIndex(3) === 0 && Levels.titleIndex(4) === 1, '5以内 3 关后进入 10以内');
+ok(Levels.getTitle(28).name === '100以内', `getTitle(28)=${Levels.getTitle(28).name}`);
+ok(Levels.getTitle(29).name === '口算大师 ★2', `getTitle(29)=${Levels.getTitle(29).name}`);
+ok(Levels.getBand(29) === 5, '口算大师难度封顶 100以内');
+ok(Levels.getDifficulty(29).carryPct === 0.5, '100以内各题型随机(carryPct=0.5)');
 ok(Levels.getPointsPerCorrect(60) === 60, `getPointsPerCorrect(60)=${Levels.getPointsPerCorrect(60)}`);
 ok(Levels.getPointsPerCorrect(61) === 60, `getPointsPerCorrect(61)=${Levels.getPointsPerCorrect(61)}`);
 

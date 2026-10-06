@@ -1,5 +1,5 @@
 /* sw.js — 离线缓存（Service Worker） */
-var CACHE = 'kousuan-v1';
+var CACHE = 'kousuan-v2';
 var ASSETS = [
   './',
   './index.html',
