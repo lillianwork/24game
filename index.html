@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>24点大冒险</title>
+  <meta name="theme-color" content="#6c5ce7">
+  <meta name="description" content="儿童24点算术闯关游戏，从加减到混合运算，逐级打怪升级">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 开始屏幕 -->
+    <section id="screen-start" class="screen active">
+      <h1 class="logo">24点大冒险</h1>
+      <p class="tagline">和小怪兽一起玩算术吧！</p>
+      <div class="mascot">🦊</div>
+      <h2>你上几年级啦？</h2>
+      <div class="grade-list">
+        <button class="grade-btn" data-grade="K">🎈 幼儿园</button>
+        <button class="grade-btn" data-grade="G1">📚 一年级</button>
+        <button class="grade-btn" data-grade="G2">✏️ 二年级</button>
+        <button class="grade-btn" data-grade="G3">🧮 三年级及以上</button>
+      </div>
+    </section>
+
+    <!-- 主页 -->
+    <section id="screen-home" class="screen">
+      <div class="home-top">
+        <div class="profile">
+          <span class="profile-emoji" id="home-title-emoji">🌱</span>
+          <div>
+            <div class="profile-title" id="home-title-name">新芽小学徒</div>
+            <div class="profile-level" id="home-level">第 1 关</div>
+          </div>
+        </div>
+        <div class="points" id="home-points">⭐ 0</div>
+      </div>
+      <div class="home-hero">
+        <div class="monster-big" id="home-monster">🐛</div>
+        <button id="btn-play" class="btn-primary big">开始第 1 关</button>
+      </div>
+      <div class="home-foot">
+        <button id="btn-mute-home" class="icon-btn">🔊</button>
+        <button id="btn-reset" class="icon-btn">🔄 重新开始</button>
+      </div>
+    </section>
+
+    <!-- 游戏屏幕 -->
+    <section id="screen-game" class="screen">
+      <div class="game-top">
+        <button id="btn-back" class="icon-btn">🏠</button>
+        <div class="game-progress">
+          <div class="level-label" id="game-level">第 1 关</div>
+          <div class="q-counter" id="game-qcounter">第 1/10 题</div>
+        </div>
+        <div class="points" id="game-points">⭐ 0</div>
+        <button id="btn-mute-game" class="icon-btn">🔊</button>
+      </div>
+
+      <div class="monster-box">
+        <div class="hp-bar"><div class="hp-fill" id="hp-fill"></div></div>
+        <div class="monster" id="game-monster">🐛</div>
+        <div class="hp-text" id="hp-text">HP 10/10</div>
+      </div>
+
+      <div class="question-label">用这些数字算出 <b>24</b> 吧！</div>
+
+      <div id="mode-toggle" class="mode-toggle hidden">
+        <button id="mode-step" class="mode-btn active">🧩 分步</button>
+        <button id="mode-expr" class="mode-btn">📝 完整式子</button>
+      </div>
+
+      <!-- 分步模式 -->
+      <div id="step-area">
+        <div class="step-history" id="step-history"></div>
+        <div class="cards" id="step-cards"></div>
+        <div class="ops" id="step-ops"></div>
+      </div>
+
+      <!-- 完整式子模式 -->
+      <div id="expr-area" class="hidden">
+        <div class="expr-display" id="expr-display">（点击下方数字和符号）</div>
+        <div class="cards" id="expr-cards"></div>
+        <div class="ops" id="expr-ops"></div>
+      </div>
+
+      <div class="game-actions">
+        <button id="btn-hint" class="btn-secondary">💡 提示</button>
+        <button id="btn-reset-q" class="btn-secondary">🔄 重来</button>
+        <button id="btn-submit" class="btn-primary hidden">✅ 算好了</button>
+      </div>
+    </section>
+
+    <!-- 过关结算 -->
+    <section id="screen-levelup" class="screen">
+      <div class="result-card">
+        <div class="result-emoji">🎉</div>
+        <h2>太棒了！过关啦！</h2>
+        <div class="result-rewards">
+          <div>答对奖励：+<span id="result-correct-points">0</span></div>
+          <div>过关奖励：+<span id="result-level-bonus">50</span></div>
+        </div>
+        <button id="btn-next-level" class="btn-primary big">下一关 ➡️</button>
+      </div>
+    </section>
+
+    <!-- title 晋级 overlay -->
+    <div id="overlay-title" class="overlay hidden">
+      <div class="result-card">
+        <div class="result-emoji">👑</div>
+        <h2>晋级啦！</h2>
+        <div class="title-badge" id="title-badge">🌱 新芽小学徒</div>
+        <div class="title-reward">奖励 +<span id="title-bonus">200</span> 积分</div>
+        <button id="btn-title-ok" class="btn-primary big">继续 ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/solver.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
