@@ -10,7 +10,7 @@
       'home-title-emoji', 'home-title-name', 'home-level', 'home-points', 'home-monster',
       'btn-play', 'btn-mute-home', 'btn-reset',
       'game-level', 'game-qcounter', 'game-points', 'game-monster', 'hp-fill', 'hp-text',
-      'step-area', 'step-history', 'step-cards', 'step-ops',
+      'step-area', 'step-history', 'step-current', 'step-cards', 'step-ops',
       'expr-area', 'expr-display', 'expr-cards', 'expr-ops',
       'btn-hint', 'btn-reset-q', 'btn-submit', 'btn-back', 'btn-mute-game',
       'mode-toggle', 'mode-step', 'mode-expr',
@@ -99,6 +99,16 @@
   }
 
   function clearHistory() { el['step-history'].innerHTML = ''; }
+
+  function setCurrentResult(val) {
+    if (val == null) {
+      el['step-current'].classList.add('hidden');
+      el['step-current'].textContent = '';
+    } else {
+      el['step-current'].classList.remove('hidden');
+      el['step-current'].textContent = '现在的结果：' + Solver.formatNumber(val);
+    }
+  }
 
   function addHistoryLine(text) {
     var d = document.createElement('div');
@@ -191,6 +201,7 @@
     renderStepCards: renderStepCards,
     renderStepOps: renderStepOps,
     clearHistory: clearHistory,
+    setCurrentResult: setCurrentResult,
     addHistoryLine: addHistoryLine,
     renderExprCards: renderExprCards,
     renderExprOps: renderExprOps,

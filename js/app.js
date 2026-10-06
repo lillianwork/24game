@@ -9,6 +9,7 @@
   var stepCards = [];
   var stepSel = [];
   var stepPendingOp = null;
+  var stepCurrent = null;
   var exprTokens = [];
   var pendingTitleUp = false;
 
@@ -84,7 +85,9 @@
     stepCards = question.numbers.slice();
     stepSel = [];
     stepPendingOp = null;
+    stepCurrent = null;
     UI.clearHistory();
+    UI.setCurrentResult(null);
     UI.renderStepCards(stepCards, stepSel, onStepCardTap);
     UI.renderStepOps(question.stage.ops, onStepOpTap);
   }
@@ -97,39 +100,104 @@
   }
 
   // ---- 分步模式 ----
+  function isAccumulator() {
+    // 纯加减用「连击运行结果」模型；混合乘除保留「任选两张」模型（需要括号/子结果）
+    return question.stage.ops.indexOf('*') === -1 && question.stage.ops.indexOf('/') === -1;
+  }
+
   function onStepCardTap(i) {
     AudioFX.play('tap');
-    var pos = stepSel.indexOf(i);
-    if (pos >= 0) {
-      stepSel.splice(pos, 1);
-      stepPendingOp = null;
-    } else {
-      if (stepSel.length >= 2) stepSel.shift();
-      stepSel.push(i);
+    if (!isAccumulator()) {
+      var p = stepSel.indexOf(i);
+      if (p >= 0) { stepSel.splice(p, 1); stepPendingOp = null; }
+      else { if (stepSel.length >= 2) stepSel.shift(); stepSel.push(i); }
+      UI.renderStepCards(stepCards, stepSel, onStepCardTap);
+      if (stepPendingOp && stepSel.length === 2) { var o0 = stepPendingOp; stepPendingOp = null; applyStep(o0); }
+      return;
     }
-    UI.renderStepCards(stepCards, stepSel, onStepCardTap);
-    if (stepPendingOp && stepSel.length === 2) {
-      var op = stepPendingOp;
-      stepPendingOp = null;
-      applyStep(op);
+
+    if (stepCurrent === null) {
+      var pos = stepSel.indexOf(i);
+      if (pos >= 0) { stepSel.splice(pos, 1); stepPendingOp = null; }
+      else { if (stepSel.length >= 2) stepSel.shift(); stepSel.push(i); }
+      UI.renderStepCards(stepCards, stepSel, onStepCardTap);
+      if (stepPendingOp && stepSel.length === 2) { var o1 = stepPendingOp; stepPendingOp = null; applyFirst(o1); }
+    } else {
+      if (stepPendingOp) { var o2 = stepPendingOp; stepPendingOp = null; applyNext(o2, i); }
+      else { stepSel = [i]; UI.renderStepCards(stepCards, stepSel, onStepCardTap); }
     }
   }
 
   function onStepOpTap(op) {
-    if (stepSel.length === 0) {
-      UI.toast('先选一张数字卡片哦～');
-      AudioFX.play('tap');
+    if (!isAccumulator()) {
+      if (stepSel.length === 0) { UI.toast('先选一张数字卡片哦～'); AudioFX.play('tap'); return; }
+      if (stepSel.length === 1) { stepPendingOp = op; UI.toast('再选一张数字卡片～'); AudioFX.play('tap'); return; }
+      applyStep(op);
       return;
     }
-    if (stepSel.length === 1) {
-      stepPendingOp = op;
-      UI.toast('再选一张数字卡片～');
-      AudioFX.play('tap');
-      return;
+
+    if (stepCurrent === null) {
+      if (stepSel.length === 0) { UI.toast('先选数字卡片哦～'); AudioFX.play('tap'); return; }
+      if (stepSel.length === 1) { stepPendingOp = op; UI.toast('再选一张数字卡片～'); AudioFX.play('tap'); return; }
+      applyFirst(op);
+    } else {
+      if (stepSel.length === 1) { applyNext(op, stepSel[0]); }
+      else { stepPendingOp = op; UI.toast('再选一张数字卡片～'); AudioFX.play('tap'); }
     }
-    applyStep(op);
   }
 
+  // 连击模型：第一步，两张卡合并成当前结果
+  function applyFirst(op) {
+    var i = stepSel[0], j = stepSel[1];
+    var a = stepCards[i], b = stepCards[j];
+    if (op === '/' && Solver.close(b, 0)) { UI.toast('不能除以0哦'); AudioFX.play('wrong'); stepPendingOp = null; return; }
+    var result = Solver.apply(a, b, op);
+    UI.addHistoryLine(Solver.formatNumber(a) + ' ' + Solver.opLabel(op) + ' ' +
+                      Solver.formatNumber(b) + ' = ' + Solver.formatNumber(result));
+    var keep = [];
+    for (var k = 0; k < stepCards.length; k++) if (k !== i && k !== j) keep.push(stepCards[k]);
+    stepCards = keep;
+    stepCurrent = result;
+    stepSel = [];
+    stepPendingOp = null;
+    UI.renderStepCards(stepCards, stepSel, onStepCardTap);
+    UI.setCurrentResult(stepCurrent);
+    maybeFinishStep();
+  }
+
+  // 连击模型：当前结果 与 一张卡 合并
+  function applyNext(op, i) {
+    var a = stepCurrent;
+    var b = stepCards[i];
+    if (op === '/' && Solver.close(b, 0)) { UI.toast('不能除以0哦'); AudioFX.play('wrong'); stepPendingOp = null; return; }
+    var result = Solver.apply(a, b, op);
+    UI.addHistoryLine(Solver.formatNumber(a) + ' ' + Solver.opLabel(op) + ' ' +
+                      Solver.formatNumber(b) + ' = ' + Solver.formatNumber(result));
+    var keep = [];
+    for (var k = 0; k < stepCards.length; k++) if (k !== i) keep.push(stepCards[k]);
+    stepCards = keep;
+    stepCurrent = result;
+    stepSel = [];
+    stepPendingOp = null;
+    UI.renderStepCards(stepCards, stepSel, onStepCardTap);
+    UI.setCurrentResult(stepCurrent);
+    maybeFinishStep();
+  }
+
+  function maybeFinishStep() {
+    if (stepCards.length === 0) {
+      if (Solver.close(stepCurrent, Levels.TARGET)) {
+        UI.toast('🎉 太棒了！');
+        onCorrect();
+      } else {
+        AudioFX.play('wrong');
+        UI.toast('结果是 ' + Solver.formatNumber(stepCurrent) + '，还不是24，再试试！');
+        setTimeout(resetStepUI, 900);
+      }
+    }
+  }
+
+  // 混合乘除：任选两张卡合并（结果作为新卡放回，支持括号式子）
   function applyStep(op) {
     var i = stepSel[0], j = stepSel[1];
     var a = stepCards[i], b = stepCards[j];

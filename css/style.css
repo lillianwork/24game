@@ -173,6 +173,19 @@ body {
   padding: 4px 10px; font-size: 15px; font-weight: 600; color: var(--primary);
 }
 
+/* 当前结果（连击模型） */
+.step-current {
+  align-self: center;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 999px;
+  margin: 2px 0;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+}
+
 /* 数字卡片 */
 .cards { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 8px 0; }
 .card {
