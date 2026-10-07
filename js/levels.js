@@ -9,6 +9,14 @@
     { id: 'G3', emoji: '🧮', name: '三年级及以上' },
   ];
 
+  // 自由练习难度档（与关卡进度无关，供觉得简单的小朋友直接跳难度）
+  var DIFFICULTIES = [
+    { id: 'd2',  emoji: '🍬', name: '2个数加减',     count: 2, ops: ['+', '-'], max: 30, points: 10 },
+    { id: 'd3',  emoji: '🍭', name: '3个数加减',     count: 3, ops: ['+', '-'], max: 30, points: 20 },
+    { id: 'd3m', emoji: '🧩', name: '3个数加减乘',   count: 3, ops: ['+', '-', '*'], max: 15, points: 30 },
+    { id: 'd4m', emoji: '🧠', name: '4个数加减乘除', count: 4, ops: ['+', '-', '*', '/'], max: 13, points: 40 },
+  ];
+
   var TITLES = [
     { emoji: '🌱', name: '新芽小学徒' },
     { emoji: '🐣', name: '数字小勇士' },
@@ -86,8 +94,14 @@
     return grade === 'G3';
   }
 
+  function getDifficulty(id) {
+    for (var i = 0; i < DIFFICULTIES.length; i++) if (DIFFICULTIES[i].id === id) return DIFFICULTIES[i];
+    return null;
+  }
+
   global.Levels = {
     GRADES: GRADES,
+    DIFFICULTIES: DIFFICULTIES,
     TITLES: TITLES,
     MONSTERS: MONSTERS,
     QUESTIONS_PER_LEVEL: QUESTIONS_PER_LEVEL,
@@ -103,5 +117,6 @@
     getNumberRange: getNumberRange,
     getPointsPerCorrect: getPointsPerCorrect,
     isExprAllowed: isExprAllowed,
+    getDifficulty: getDifficulty,
   };
 })(window);

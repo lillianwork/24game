@@ -143,6 +143,20 @@ body {
 }
 .grade-chip.active { background: #fff; color: var(--primary); font-weight: 700; }
 
+/* ---- 自由练习难度选择 ---- */
+.diff-list { display: flex; flex-direction: column; gap: 10px; margin: 12px 0 16px; }
+.diff-btn {
+  font-size: 18px; padding: 14px; border: none; border-radius: 16px;
+  background: var(--primary); color: #fff; cursor: pointer; font-weight: 700;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.diff-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
+.diff-btn:nth-child(1) { background: #00b894; }
+.diff-btn:nth-child(2) { background: #0984e3; }
+.diff-btn:nth-child(3) { background: #6c5ce7; }
+.diff-btn:nth-child(4) { background: #e17055; }
+
 /* ---- 游戏屏幕 ---- */
 #screen-game { gap: 10px; }
 .game-top { display: flex; align-items: center; gap: 8px; }

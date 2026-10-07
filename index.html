@@ -48,6 +48,7 @@
         <div class="grade-switch-btns" id="grade-switch-btns"></div>
       </div>
       <div class="home-foot">
+        <button id="btn-practice" class="btn-secondary">🎮 自由练习</button>
         <button id="btn-mute-home" class="icon-btn">🔊</button>
         <button id="btn-reset" class="icon-btn">🔄 重新开始</button>
       </div>
@@ -103,11 +104,11 @@
     <!-- 过关结算 -->
     <section id="screen-levelup" class="screen">
       <div class="result-card">
-        <div class="result-emoji">🎉</div>
-        <h2>太棒了！过关啦！</h2>
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <h2 id="result-title">太棒了！过关啦！</h2>
         <div class="result-rewards">
           <div>答对奖励：+<span id="result-correct-points">0</span></div>
-          <div>过关奖励：+<span id="result-level-bonus">50</span></div>
+          <div id="result-bonus-line">过关奖励：+<span id="result-level-bonus">50</span></div>
         </div>
         <button id="btn-next-level" class="btn-primary big">下一关 ➡️</button>
       </div>
@@ -121,6 +122,16 @@
         <div class="title-badge" id="title-badge">🌱 新芽小学徒</div>
         <div class="title-reward">奖励 +<span id="title-bonus">200</span> 积分</div>
         <button id="btn-title-ok" class="btn-primary big">继续 ➡️</button>
+      </div>
+    </div>
+
+    <!-- 自由练习 难度选择 overlay -->
+    <div id="overlay-practice" class="overlay hidden">
+      <div class="result-card">
+        <div class="result-emoji">🎮</div>
+        <h2>选个难度练练手</h2>
+        <div class="diff-list" id="diff-list"></div>
+        <button id="btn-practice-close" class="btn-secondary">返回</button>
       </div>
     </div>
   </div>

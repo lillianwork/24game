@@ -8,12 +8,14 @@
     var ids = [
       'screen-start', 'screen-home', 'screen-game', 'screen-levelup', 'overlay-title',
       'home-title-emoji', 'home-title-name', 'home-level', 'home-points', 'home-monster',
-      'grade-switch-btns', 'btn-play', 'btn-mute-home', 'btn-reset',
+      'grade-switch-btns', 'btn-play', 'btn-mute-home', 'btn-reset', 'btn-practice',
+      'overlay-practice', 'diff-list', 'btn-practice-close',
       'game-level', 'game-qcounter', 'game-points', 'game-monster', 'hp-fill', 'hp-text',
       'step-area', 'step-history', 'step-current', 'step-cards', 'step-ops',
       'expr-area', 'expr-display', 'expr-cards', 'expr-ops',
       'btn-hint', 'btn-reset-q', 'btn-submit', 'btn-back', 'btn-mute-game',
       'mode-toggle', 'mode-step', 'mode-expr',
+      'result-emoji', 'result-title', 'result-bonus-line',
       'result-correct-points', 'result-level-bonus', 'btn-next-level',
       'title-badge', 'title-bonus', 'btn-title-ok', 'toast'
     ];
@@ -51,9 +53,9 @@
     });
   }
 
-  function renderGameChrome(state, questionIndex, grade, mode) {
+  function renderGameChrome(state, questionIndex, grade, mode, title) {
     var mon = Levels.getMonster(state.level);
-    el['game-level'].textContent = '第 ' + state.level + ' 关';
+    el['game-level'].textContent = title || ('第 ' + state.level + ' 关');
     el['game-points'].textContent = '⭐ ' + state.points;
     el['game-monster'].textContent = mon.emoji;
     el['mode-toggle'].classList.toggle('hidden', !Levels.isExprAllowed(grade));
@@ -189,9 +191,42 @@
   }
 
   function renderLevelUp(correctTotal, levelBonus) {
+    el['result-emoji'].textContent = '🎉';
+    el['result-title'].textContent = '太棒了！过关啦！';
     el['result-correct-points'].textContent = String(correctTotal);
     el['result-level-bonus'].textContent = String(levelBonus);
+    el['result-bonus-line'].style.display = '';
+    el['btn-next-level'].textContent = '下一关 ➡️';
     showScreen('levelup');
+  }
+
+  function renderPracticeDone(correctTotal) {
+    el['result-emoji'].textContent = '🎯';
+    el['result-title'].textContent = '练习完成！';
+    el['result-correct-points'].textContent = String(correctTotal);
+    el['result-bonus-line'].style.display = 'none';
+    el['btn-next-level'].textContent = '返回主页';
+    showScreen('levelup');
+  }
+
+  function renderDifficultyList(onPick) {
+    el['diff-list'].innerHTML = '';
+    Levels.DIFFICULTIES.forEach(function (d) {
+      var b = document.createElement('button');
+      b.className = 'diff-btn';
+      b.setAttribute('data-diff', d.id);
+      b.textContent = d.emoji + ' ' + d.name;
+      b.addEventListener('click', function () { onPick(d.id); });
+      el['diff-list'].appendChild(b);
+    });
+  }
+
+  function showPracticeOverlay(onPick) {
+    renderDifficultyList(onPick);
+    el['overlay-practice'].classList.remove('hidden');
+  }
+  function hidePracticeOverlay() {
+    el['overlay-practice'].classList.add('hidden');
   }
 
   function showTitleOverlay(title, bonus) {
@@ -223,6 +258,10 @@
     updatePoints: updatePoints,
     animateMonsterHit: animateMonsterHit,
     renderLevelUp: renderLevelUp,
+    renderPracticeDone: renderPracticeDone,
+    renderDifficultyList: renderDifficultyList,
+    showPracticeOverlay: showPracticeOverlay,
+    hidePracticeOverlay: hidePracticeOverlay,
     showTitleOverlay: showTitleOverlay,
     hideTitleOverlay: hideTitleOverlay,
   };

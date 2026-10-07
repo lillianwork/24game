@@ -12,6 +12,7 @@
   var stepCurrent = null;
   var exprTokens = [];
   var pendingTitleUp = false;
+  var practice = null;
 
   function init() {
     UI.cache();
@@ -65,6 +66,7 @@
   }
 
   function startGame() {
+    practice = null;
     mode = 'step';
     pendingTitleUp = false;
     questionIndex = 0;
@@ -72,9 +74,27 @@
     startQuestion();
   }
 
+  function startPractice(diffId) {
+    practice = Levels.getDifficulty(diffId);
+    if (!practice) return;
+    AudioFX.play('tap');
+    UI.hidePracticeOverlay();
+    mode = 'step';
+    pendingTitleUp = false;
+    questionIndex = 0;
+    UI.renderGameChrome(state, questionIndex, state.grade, mode, practice.name);
+    startQuestion();
+  }
+
   function startQuestion() {
-    var stage = Levels.getStage(state.level);
-    var range = Levels.getNumberRange(state.level);
+    var stage, range;
+    if (practice) {
+      stage = { count: practice.count, ops: practice.ops };
+      range = { min: 1, max: practice.max };
+    } else {
+      stage = Levels.getStage(state.level);
+      range = Levels.getNumberRange(state.level);
+    }
     var numbers = null;
     for (var i = 0; i < 30 && !numbers; i++) {
       var cand = Solver.generate(stage.count, stage.ops, range.min, range.max, Levels.TARGET);
@@ -284,13 +304,13 @@
 
   function onCorrect() {
     AudioFX.play('correct');
-    state.points += Levels.getPointsPerCorrect(state.level);
+    state.points += practice ? practice.points : Levels.getPointsPerCorrect(state.level);
     UI.updatePoints(state.points);
     UI.animateMonsterHit();
     questionIndex++;
     UI.setHp(questionIndex);
     if (questionIndex >= Levels.QUESTIONS_PER_LEVEL) {
-      completeLevel();
+      if (practice) completePractice(); else completeLevel();
     } else {
       setTimeout(startQuestion, 650);
     }
@@ -309,9 +329,19 @@
     UI.renderLevelUp(correctTotal, Levels.LEVEL_BONUS);
   }
 
+  function completePractice() {
+    var correctTotal = practice.points * Levels.QUESTIONS_PER_LEVEL;
+    Storage.save(state);
+    AudioFX.play('levelUp');
+    UI.renderPracticeDone(correctTotal);
+  }
+
   function onNextLevel() {
     AudioFX.play('tap');
-    if (pendingTitleUp) {
+    if (practice) {
+      practice = null;
+      showHome();
+    } else if (pendingTitleUp) {
       UI.showTitleOverlay(Levels.getTitle(state.level), Levels.TITLE_BONUS);
       AudioFX.play('titleUp');
     } else {
@@ -370,11 +400,13 @@
       })(gradeBtns[i]);
     }
     document.getElementById('btn-play').addEventListener('click', function () { AudioFX.play('tap'); startGame(); });
+    document.getElementById('btn-practice').addEventListener('click', function () { AudioFX.play('tap'); UI.showPracticeOverlay(startPractice); });
+    document.getElementById('btn-practice-close').addEventListener('click', function () { AudioFX.play('tap'); UI.hidePracticeOverlay(); });
     document.getElementById('grade-switch-btns').addEventListener('click', function (e) {
       var chip = e.target.closest ? e.target.closest('.grade-chip') : null;
       if (chip) onGradeSwitch(chip.getAttribute('data-grade'));
     });
-    document.getElementById('btn-back').addEventListener('click', function () { AudioFX.play('tap'); showHome(); });
+    document.getElementById('btn-back').addEventListener('click', function () { AudioFX.play('tap'); practice = null; showHome(); });
     document.getElementById('btn-reset').addEventListener('click', onReset);
     document.getElementById('btn-mute-home').addEventListener('click', toggleMute);
     document.getElementById('btn-mute-game').addEventListener('click', toggleMute);
