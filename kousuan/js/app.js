@@ -88,11 +88,7 @@
     UI.renderQuestion(question);
     UI.renderAnswer('');
     UI.setQCounter(questionIndex);
-    if (question.method) {
-      playInlineMethod(question);
-    } else {
-      inputLocked = false;
-    }
+    inputLocked = false;
   }
 
   function questionSig(q) { return q.a + '|' + q.op + '|' + q.b; }
@@ -109,16 +105,32 @@
   function playInlineMethod(q) {
     inputLocked = true;
     if (inlineAnimHandle) inlineAnimHandle.stop();
+    AudioFX.stopSpeak();
     UI.showMethodOverlay();
+    UI.setOverlayStepLabel('下一步 ➡️');
     var steps = Methods.decompose(q).steps;
     inlineAnimHandle = UI.Animator.play(UI.animContainer('overlay'), steps, {
-      onDone: function () {
-        setTimeout(function () {
-          UI.hideMethodOverlay();
-          inputLocked = false;
-        }, 600);
+      manual: true,
+      onStep: function (step, idx) {
+        if (idx === steps.length - 1) UI.setOverlayStepLabel('🔁 再看一遍');
       },
     });
+  }
+
+  function onOverlayStep() {
+    if (inlineAnimHandle && inlineAnimHandle.finished()) {
+      playInlineMethod(question);
+    } else if (inlineAnimHandle) {
+      inlineAnimHandle.next();
+    }
+  }
+
+  function closeMethodOverlay() {
+    if (inlineAnimHandle) { inlineAnimHandle.stop(); inlineAnimHandle = null; }
+    AudioFX.stopSpeak();
+    UI.hideMethodOverlay();
+    inputLocked = false;
+    AudioFX.play('tap');
   }
 
   function onDigit(d) {
@@ -162,11 +174,7 @@
     AudioFX.play('wrong');
     answerStr = '';
     UI.renderAnswer('');
-    if (question.method) {
-      playInlineMethod(question);
-    } else {
-      UI.toast('再想想哦～');
-    }
+    UI.toast('再想想哦～');
   }
 
   function completeLevel() {
@@ -240,6 +248,8 @@
     document.getElementById('btn-mute-game').addEventListener('click', toggleMute);
     document.getElementById('btn-hint').addEventListener('click', onHint);
     document.getElementById('btn-reset-q').addEventListener('click', onResetQuestion);
+    document.getElementById('btn-overlay-step').addEventListener('click', onOverlayStep);
+    document.getElementById('btn-overlay-close').addEventListener('click', closeMethodOverlay);
     document.getElementById('btn-next-level').addEventListener('click', onNextLevel);
     document.getElementById('btn-title-ok').addEventListener('click', onTitleOk);
 

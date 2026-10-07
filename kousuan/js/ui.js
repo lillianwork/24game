@@ -19,7 +19,7 @@
       'method-detail-emoji', 'method-detail-name', 'method-detail-slogan', 'method-detail-desc',
       'method-detail-anim', 'btn-method-step', 'btn-method-play', 'btn-method-next', 'btn-method-practice', 'btn-method-detail-back',
       'title-badge', 'title-bonus', 'btn-title-ok',
-      'method-overlay-anim', 'toast',
+      'method-overlay-anim', 'btn-overlay-step', 'btn-overlay-close', 'toast',
     ];
     ids.forEach(function (id) { el[id] = document.getElementById(id); });
   }
@@ -128,6 +128,7 @@
 
   function showMethodOverlay() { el['overlay-method'].classList.remove('hidden'); }
   function hideMethodOverlay() { el['overlay-method'].classList.add('hidden'); }
+  function setOverlayStepLabel(text) { el['btn-overlay-step'].textContent = text; }
 
   // ---- 方法课堂 ----
   function renderMethodList(onTap) {
@@ -319,6 +320,7 @@
     hideTitleOverlay: hideTitleOverlay,
     showMethodOverlay: showMethodOverlay,
     hideMethodOverlay: hideMethodOverlay,
+    setOverlayStepLabel: setOverlayStepLabel,
     renderMethodList: renderMethodList,
     renderSelectList: renderSelectList,
     renderMethodDetail: renderMethodDetail,
